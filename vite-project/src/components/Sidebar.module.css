@@ -13,6 +13,13 @@
     flex-direction: column;
     align-items: center;
 }
+
+.avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 8px;
+}
+
 .sidebar footer{
     border-top: 1px solid var(--gray-600);
     margin-top: 1.5rem;
@@ -20,9 +27,9 @@
 }
 
 .sidebar footer a{
-    background-color: transparent;
+    background: transparent;
     color: var(--green-500);
-    border-top: 1px solid var(--green-500);
+    border: 1px solid var(--green-500);
     border-radius: 8px;
     height: 50px;
     padding: 0 1.5rem;
