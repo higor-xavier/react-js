@@ -16,14 +16,6 @@ export function App() {
                         author='higor x' 
                         content='Lorem ipsum dolor sit, amet consectetur'
                     />
-                    <Post 
-                        author='laura x' 
-                        content='Lorem ipsum dolor sit, amet consectetur'
-                    />
-                    <Post 
-                        author='clara x' 
-                        content='Post maneiro'
-                    />
                  </main>
             </div>
             
