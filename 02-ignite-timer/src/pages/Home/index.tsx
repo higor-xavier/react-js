@@ -1,5 +1,7 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod' // conexão do hookform com o validador de campos zod
+import * as zod from 'zod' // usando o operador * do ecmascript para essa biblioteca que não possui export default
 
 import {
   CountdownContainer,
@@ -14,9 +16,18 @@ import {
 // controlled: mantém em tempo real a informação do input do usuário guardada no estado da aplicação
 // uncontrolled: a informação do input só é buscada quando é necessária
 
-export function Home() {
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Informe a tarefa'),
+  minutesAmout: zod
+    .number()
+    .min(5, 'O ciclo precisa ser de no minímo 5 minutos')
+    .max(60, 'O ciclo precisa ser de no máximo 60 minutos'),
+})
 
-  const { register, handleSubmit, watch } = useForm()
+export function Home() {
+  const { register, handleSubmit, watch } = useForm({
+    resolver: zodResolver(newCycleFormValidationSchema),
+  })
 
   function handleCreateNewCycle(data: any) {
     console.log(data)
