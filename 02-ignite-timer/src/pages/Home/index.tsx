@@ -2,7 +2,8 @@ import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod' // conexão do hookform com o validador de campos zod
 import * as zod from 'zod' // usando o operador * do ecmascript para essa biblioteca que não possui export default
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { differenceInSeconds } from 'date-fns'
 
 import {
   CountdownContainer,
@@ -32,6 +33,7 @@ interface Cycle {
   id: string
   task: string
   minutesAmount: number
+  startDate: Date
 }
 
 export function Home() {
@@ -49,13 +51,29 @@ export function Home() {
     },
   })
 
+  // Variável que guarda o ciclo ativo
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  useEffect(() => {
+    if (activeCycle) {
+      setInterval(() => {
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate),
+        )
+      }, 1000)
+    }
+  }, [activeCycle])
+
   function handleCreateNewCycle(data: NewCycleFormData) {
     // Guardando o ID com o valor em milissegundos da data no momento da adição da tarefa
     const id = String(new Date().getTime())
+
+    // Criando novo ciclo
     const newCycle: Cycle = {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
+      startDate: new Date(),
     }
 
     // Sempre que uma alteração de estado depender da anterior, deve-se usar o formato de arrowfunction
@@ -64,8 +82,6 @@ export function Home() {
 
     reset()
   }
-
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   // Salvando nessa variável o valor em segundos da quantidade de minutos do ciclo
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
