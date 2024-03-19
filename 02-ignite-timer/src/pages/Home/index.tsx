@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod' // conexão do hookform com o validador de campos zod
 import * as zod from 'zod' // usando o operador * do ecmascript para essa biblioteca que não possui export default
 import { useEffect, useState } from 'react'
-import { differenceInSeconds } from 'date-fns'
+import { differenceInSeconds, interval } from 'date-fns'
 
 import {
   CountdownContainer,
@@ -55,13 +55,19 @@ export function Home() {
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   useEffect(() => {
+    let interval: number
     if (activeCycle) {
-      setInterval(() => {
+      interval = setInterval(() => {
         setAmountSecondsPassed(
           differenceInSeconds(new Date(), activeCycle.startDate),
         )
       }, 1000)
     }
+
+    return () => {
+      clearInterval(interval)
+    }
+
   }, [activeCycle])
 
   function handleCreateNewCycle(data: NewCycleFormData) {
@@ -79,6 +85,7 @@ export function Home() {
     // Sempre que uma alteração de estado depender da anterior, deve-se usar o formato de arrowfunction
     setCycles((state) => [...state, newCycle])
     setActiveCycleId(id)
+    setAmountSecondsPassed(0)
 
     reset()
   }
@@ -97,6 +104,12 @@ export function Home() {
   // Os caracteres, quando abaixo de 10, devem apresentar o '0' como primeiro algarismo na interface
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [minutes, seconds, activeCycle])
 
   const task = watch('task')
   const isSubmitDisabled = !task
