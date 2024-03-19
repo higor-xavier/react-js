@@ -1,9 +1,9 @@
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod' // conexão do hookform com o validador de campos zod
 import * as zod from 'zod' // usando o operador * do ecmascript para essa biblioteca que não possui export default
 import { useEffect, useState } from 'react'
-import { differenceInSeconds, interval } from 'date-fns'
+import { differenceInSeconds } from 'date-fns'
 
 import {
   CountdownContainer,
@@ -12,6 +12,7 @@ import {
   MinutesAmountInput,
   Separator,
   StartCountDownButton,
+  StopCountDownButton,
   TaskInput,
 } from './styles'
 
@@ -34,6 +35,8 @@ interface Cycle {
   task: string
   minutesAmount: number
   startDate: Date
+  interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -54,21 +57,42 @@ export function Home() {
   // Variável que guarda o ciclo ativo
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
+  // Salvando nessa variável o valor em segundos da quantidade de minutos do ciclo
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+
   useEffect(() => {
     let interval: number
     if (activeCycle) {
       interval = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate),
+        const secondsDifference = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate,
         )
+
+        if (secondsDifference >= totalSeconds) {
+          setCycles((state) =>
+            state.map((cycle) => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDateDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+          )
+
+          setAmountSecondsPassed(totalSeconds)
+
+          clearInterval(interval)
+        } else {
+          setAmountSecondsPassed(secondsDifference)
+        }
       }, 1000)
     }
 
     return () => {
       clearInterval(interval)
     }
-
-  }, [activeCycle])
+  }, [activeCycle, totalSeconds, activeCycleId])
 
   function handleCreateNewCycle(data: NewCycleFormData) {
     // Guardando o ID com o valor em milissegundos da data no momento da adição da tarefa
@@ -90,8 +114,18 @@ export function Home() {
     reset()
   }
 
-  // Salvando nessa variável o valor em segundos da quantidade de minutos do ciclo
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  function handleInterruptCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
+  }
 
   // Quantidade de segundos atualizado sem o valor de segundos passados
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
@@ -123,6 +157,7 @@ export function Home() {
             id="task"
             list="task-suggestions"
             placeholder="Dê um nome para o seu projeto"
+            disabled={!!activeCycle}
             {...register('task')}
           />
 
@@ -141,6 +176,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            disabled={!!activeCycle}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
 
@@ -155,10 +191,17 @@ export function Home() {
           <span>{seconds[1]}</span>
         </CountdownContainer>
 
-        <StartCountDownButton disabled={isSubmitDisabled} type="submit">
-          <Play size={24} />
-          Começar
-        </StartCountDownButton>
+        {activeCycle ? (
+          <StopCountDownButton onClick={handleInterruptCycle} type="button">
+            <HandPalm size={24} />
+            Interromper
+          </StopCountDownButton>
+        ) : (
+          <StartCountDownButton disabled={isSubmitDisabled} type="submit">
+            <Play size={24} />
+            Começar
+          </StartCountDownButton>
+        )}
       </form>
     </HomeContainer>
   )
