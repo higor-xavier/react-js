@@ -76,7 +76,8 @@ export function NewTransactionModal() {
                     <Controller 
                         control={control}
                         name="type"
-                        render={({ field }) => {
+                        //render retorna o conteúdo relacionado ao name, no caso type
+                        render={({ field }) => {  //field fornece informações mais específicas sobre o campo em uso
                             return (
                                 <TransactionType 
                                     onValueChange={field.onChange} 
