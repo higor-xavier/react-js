@@ -1,9 +1,9 @@
-import { Button } from "./components/ui/button"
-import "./global.css"
+import { Button } from './components/ui/button'
+import './global.css'
 
 export function App() {
   return (
-    <div className="flex justify-center itens-center h-screen">
+    <div className="itens-center flex h-screen justify-center">
       <Button>Enviar</Button>
     </div>
   )
