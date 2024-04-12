@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { singIn } from '@/api/sign-in'
+import { signIn } from '@/api/sign-in'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,16 +17,22 @@ const signInForm = z.object({
 type SignInForm = z.infer<typeof signInForm>
 
 export function SignIn() {
+  const [searchParams] = useSearchParams()
+
   // registra informações do input e handle envia sem as antigas necessidades
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<SignInForm>()
+  } = useForm<SignInForm>({
+    defaultValues: {
+      email: searchParams.get('email') ?? '',
+    },
+  })
 
   // usando o Mutation do react-query sempre que for fazer uma alteração no back
   const { mutateAsync: authenticate } = useMutation({
-    mutationFn: singIn,
+    mutationFn: signIn,
   })
 
   async function handleSignIn(data: SignInForm) {
