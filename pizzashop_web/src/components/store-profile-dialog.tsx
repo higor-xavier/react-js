@@ -25,7 +25,7 @@ import { Textarea } from './ui/textarea'
 
 const storeProfileSchema = z.object({
   name: z.string().min(1),
-  description: z.string(),
+  description: z.string().nullable(),
 })
 
 type StoreProfileSchema = z.infer<typeof storeProfileSchema>
@@ -51,22 +51,43 @@ export function StoreProfileDialog() {
     },
   })
 
+  function updateManagedRestauranteCache({
+    name,
+    description,
+  }: StoreProfileSchema) {
+    const cached = queryClient.getQueryData<GetManagedRestaurantResponse>([
+      'managed-restaurant',
+    ])
+
+    if (cached) {
+      queryClient.setQueryData<GetManagedRestaurantResponse>(
+        ['managed-restaurant'],
+        {
+          ...cached,
+          name,
+          description,
+        },
+      )
+    }
+
+    return { cached }
+  }
+
   const { mutateAsync: updateProfileFn } = useMutation({
     mutationFn: updateProfile,
-    onSuccess(_, { name, description }) {
-      const cached = queryClient.getQueryData<GetManagedRestaurantResponse>([
-        'managed-restaurant',
-      ])
+    onMutate({ name, description }) {
+      const { cached } = updateManagedRestauranteCache({ name, description })
 
-      if (cached) {
-        queryClient.setQueryData<GetManagedRestaurantResponse>(
-          ['managed-restaurant'],
-          {
-            ...cached,
-            name,
-            description,
-          },
-        )
+      return { previousProfile: cached }
+    },
+    // Pode possuir parametro de dados especificando o erro,
+    // as variáveis utilizadas e também o contexto que fornece informações para compartilhar
+    // entre o contexto de uma mutação ou query.
+    // Todo retorno do onMutate é adicionado ao parâmetro de contexto.
+    // Nesse caso em específico, está sendo utilizado apenas o contexto
+    onError(_, __, context) {
+      if (context?.previousProfile) {
+        updateManagedRestauranteCache(context.previousProfile)
       }
     },
   })
