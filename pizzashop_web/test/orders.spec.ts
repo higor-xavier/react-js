@@ -64,7 +64,7 @@ test('filter by customer name', async ({ page }) => {
   await page.getByPlaceholder('Nome do cliente').fill('Customer 11')
   await page.getByRole('button', { name: 'Filtrar resultados' }).click()
 
-  expect(page.getByRole('cell', { name: 'customer-11' })).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'customer-11' })).toBeVisible()
 })
 
 test('filter by status', async ({ page }) => {
