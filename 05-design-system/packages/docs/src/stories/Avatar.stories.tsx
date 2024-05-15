@@ -8,6 +8,13 @@ export default {
         src: 'http://github.com/higor-xavier.png',
         alt: 'Higor Xavier',
     },
+    argTypes: {
+        src: {
+            control: {
+                type: 'text',
+            },
+        },
+    },
 } as Meta<AvatarProps>
 
 export const Primary: StoryObj<AvatarProps> = {}
